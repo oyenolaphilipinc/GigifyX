@@ -6,10 +6,9 @@ import React, { useEffect, useState } from "react";
 import { HOST, SET_USER_IMAGE, SET_USER_INFO } from "../utils/constants";
 import { reducerCases } from "../context/constants";
 import { useCookies } from "react-cookie";
-import { headers } from "next/dist/client/components/headers";
 import { toast } from "react-toastify";
 
-function Profile() {
+export default function Profile() {
   const [cookies] = useCookies();
   const router = useRouter();
   const [{ userInfo }, dispatch] = useStateProvider();
@@ -106,58 +105,57 @@ function Profile() {
         router.push("/");
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
+      toast.error("An error occurred while updating the profile");
     }
   };
 
   const inputClassName =
-    "block p-4 w-full text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50  focus:ring-blue-500 focus:border-blue-500";
+    "block p-4 w-full text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500";
   const labelClassName = "mb-2 text-lg font-medium text-gray-900";
 
   return (
     <>
       {isLoaded && (
-        <div className="flex flex-col items-center justify-start min-h-[80vh] gap-3">
+        <div className="flex flex-col items-center justify-start min-h-[80vh] px-4 py-8 max-w-4xl mx-auto">
           {errorMessage && (
-            <div>
+            <div className="w-full mb-4 text-center">
               <span className="text-red-600 font-bold">{errorMessage}</span>
             </div>
           )}
-          <h2 className="text-3xl">Welcome to freelanceX 👋 </h2>
-          <h4 className="text-xl">
+          <h2 className="text-2xl md:text-3xl text-center mb-2">Welcome to freelanceX 👋</h2>
+          <h4 className="text-lg md:text-xl text-center mb-6">
             Please complete your profile to get started!
           </h4>
-          <div className="flex flex-col items-center w-full gap-5">
+          <div className="flex flex-col items-center w-full gap-6">
             <div
               className="flex flex-col items-center cursor-pointer"
               onMouseEnter={() => setImageHover(true)}
               onMouseLeave={() => setImageHover(false)}
             >
-              <label className={labelClassName}>Select a profile Picture</label>
-              <div className="bg-purple-500 h-36 w-36 flex items-center justify-center rounded-full relative">
+              <label className={`${labelClassName} text-center`}>Select a profile Picture</label>
+              <div className="bg-purple-500 h-28 w-28 md:h-36 md:w-36 flex items-center justify-center rounded-full relative">
                 {image ? (
                   <Image
                     src={URL.createObjectURL(image)}
                     alt="profile"
                     fill
-                    className="rounded-full"
+                    className="rounded-full object-cover"
                   />
                 ) : (
-                  <span className="text-6xl text-white">
+                  <span className="text-4xl md:text-6xl text-white">
                     {userInfo?.email[0].toUpperCase()}
                   </span>
                 )}
                 <div
-                  className={`absolute bg-slate-400 h-full w-full rounded-full flex items-center justify-center   transition-all duration-100  ${
-                    imageHover ? "opacity-100" : "opacity-0"
+                  className={`absolute bg-slate-400 h-full w-full rounded-full flex items-center justify-center transition-all duration-100 ${
+                    imageHover ? "opacity-50" : "opacity-0"
                   }`}
                 >
-                  <span
-                    className={` flex items-center justify-center  relative`}
-                  >
+                  <span className="flex items-center justify-center relative">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="w-12 h-12 text-white absolute"
+                      className="w-8 h-8 md:w-12 md:h-12 text-white absolute"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -170,7 +168,7 @@ function Profile() {
                     <input
                       type="file"
                       onChange={handleFile}
-                      className="opacity-0"
+                      className="opacity-0 w-full h-full cursor-pointer"
                       multiple={true}
                       name="profileImage"
                     />
@@ -178,7 +176,7 @@ function Profile() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 w-[500px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg">
               <div>
                 <label className={labelClassName} htmlFor="userName">
                   Please select a username
@@ -193,7 +191,6 @@ function Profile() {
                   onChange={handleChange}
                 />
               </div>
-
               <div>
                 <label className={labelClassName} htmlFor="fullName">
                   Please enter your full Name
@@ -209,7 +206,7 @@ function Profile() {
                 />
               </div>
             </div>
-            <div className="flex flex-col w-[500px]">
+            <div className="w-full max-w-lg">
               <label className={labelClassName} htmlFor="description">
                 Description
               </label>
@@ -218,12 +215,12 @@ function Profile() {
                 id="description"
                 value={data.description}
                 onChange={handleChange}
-                className={inputClassName}
-                placeholder="description"
+                className={`${inputClassName} h-24`}
+                placeholder="Description"
               ></textarea>
             </div>
             <button
-              className="border   text-lg font-semibold px-5 py-3  mb-12 border-[#1DBF73] bg-[#1DBF73] text-white rounded-md"
+              className="w-full max-w-lg border text-lg font-semibold px-5 py-3 mb-12 border-[#1DBF73] bg-[#1DBF73] text-white rounded-md hover:bg-[#18a164] transition-colors"
               type="button"
               onClick={setProfile}
             >
@@ -235,5 +232,3 @@ function Profile() {
     </>
   );
 }
-
-export default Profile;

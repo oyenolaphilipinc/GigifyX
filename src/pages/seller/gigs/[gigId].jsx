@@ -11,7 +11,7 @@ import {
 import { useRouter } from "next/router";
 import { useCookies } from "react-cookie";
 
-const create = () => {
+const EditGig = () => {
   const [cookies] = useCookies();
   const router = useRouter();
   const { gigId } = router.query;
@@ -46,8 +46,7 @@ const create = () => {
   };
 
   const editGig = async () => {
-    const { title, category, description, time, revisions, price, shortDesc } =
-      data;
+    const { title, category, description, time, revisions, price, shortDesc } = data;
     if (
       category &&
       description &&
@@ -72,20 +71,24 @@ const create = () => {
         features,
       };
 
-      const response = await axios.put(
-        `${UPDATE_GIG_ROUTE}/${gigId}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${cookies.jwt}`,
-          },
-          params: gigData,
-        }
-      );
+      try {
+        const response = await axios.put(
+          `${UPDATE_GIG_ROUTE}/${gigId}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${cookies.jwt}`,
+            },
+            params: gigData,
+          }
+        );
 
-      if (response.status === 200) {
-        router.push("/seller/gigs");
+        if (response.status === 200) {
+          router.push("/seller/gigs");
+        }
+      } catch (error) {
+        console.error("Error updating gig:", error);
       }
     }
   };
@@ -99,18 +102,19 @@ const create = () => {
         setData({ ...gig, time: gig.revisions });
         setFeatures(gig.features);
 
-        gig.images.forEach((image) => {
+        const filePromises = gig.images.map((image) => {
           const url = HOST + "/uploads/" + image;
-          const fileName = image;
-          fetch(url).then(async (response) => {
+          return fetch(url).then(async (response) => {
             const contentType = response.headers.get("content-type");
             const blob = await response.blob();
-            const files = new File([blob], fileName, { contentType });
-            setFiles([files]);
+            return new File([blob], image, { type: contentType });
           });
         });
+
+        const fetchedFiles = await Promise.all(filePromises);
+        setFiles(fetchedFiles);
       } catch (ex) {
-        console.log(ex);
+        console.error("Error fetching gig:", ex);
       }
     };
     if (gigId) {
@@ -118,18 +122,17 @@ const create = () => {
     }
   }, [gigId]);
 
-  const inputClassName =
-    "block p-4 w-full text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50  focus:ring-blue-500 focus:border-blue-500";
-  const labelClassName = "mb-2 text-lg font-medium text-gray-900";
+  const inputClassName = "block p-2 w-full text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500";
+  const labelClassName = "block mb-2 text-sm font-medium text-gray-900";
 
   return (
-    <div className="min-h-[80vh] my-10 mt-0 px-32">
-      <h1 className="text-6xl text-gray-900 mb-5">Edit Gig</h1>
-      <h3 className="text-3xl text-gray-900 mb-5">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8">
+      <h1 className="text-3xl sm:text-4xl lg:text-5xl text-gray-900 mb-4">Edit Gig</h1>
+      <h3 className="text-xl sm:text-2xl text-gray-900 mb-6">
         Enter the details to edit the gig
       </h3>
-      <form className="flex flex-col gap-5 mt-10">
-        <div className="grid grid-cols-2 gap-11">
+      <form className="flex flex-col gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <label htmlFor="title" className={labelClassName}>
               Gig Title
@@ -141,7 +144,7 @@ const create = () => {
               onChange={handleChange}
               id="title"
               className={inputClassName}
-              placeholder="eg. I will do something, I am really good at"
+              placeholder="e.g. I will do something I'm really good at"
               required
             />
           </div>
@@ -152,7 +155,7 @@ const create = () => {
             <select
               name="category"
               id="category"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-4"
+              className={inputClassName}
               onChange={handleChange}
               value={data.category}
             >
@@ -171,15 +174,15 @@ const create = () => {
           <textarea
             name="description"
             id="description"
-            className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            className={`${inputClassName} h-32`}
             placeholder="Write a short description"
             value={data.description}
             onChange={handleChange}
           ></textarea>
         </div>
-        <div className="grid grid-cols-2 gap-11">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="delivery">Delivery Time</label>
+            <label htmlFor="delivery" className={labelClassName}>Delivery Time</label>
             <input
               type="number"
               className={inputClassName}
@@ -205,12 +208,12 @@ const create = () => {
             />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-11">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <label htmlFor="features" className={labelClassName}>
               Features
             </label>
-            <div className="flex gap-3 items-center mb-5">
+            <div className="flex flex-col sm:flex-row gap-2 mb-4">
               <input
                 type="text"
                 id="features"
@@ -222,50 +225,47 @@ const create = () => {
               />
               <button
                 type="button"
-                className="focus:outline-none text-white bg-blue-700 hover:bg-blue-800  font-medium  text-lg px-10 py-3 rounded-md "
+                className="w-full sm:w-auto px-4 py-2 text-white bg-blue-700 hover:bg-blue-800 rounded-md"
                 onClick={addFeature}
               >
                 Add
               </button>
             </div>
-            <ul className="flex gap-2 flex-wrap">
-              {features.map((feature, index) => {
-                return (
-                  <li
-                    key={feature + index.toString()}
-                    className="flex gap-2 items-center py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-red-700 cursor-pointer hover:border-red-200"
+            <ul className="flex flex-wrap gap-2">
+              {features.map((feature, index) => (
+                <li
+                  key={feature + index.toString()}
+                  className="flex items-center py-1 px-2 text-sm bg-gray-100 rounded-md"
+                >
+                  <span>{feature}</span>
+                  <button
+                    type="button"
+                    className="ml-2 text-red-600 hover:text-red-800"
+                    onClick={() => removeFeature(index)}
                   >
-                    <span>{feature}</span>
-                    <span
-                      className="text-red-700"
-                      onClick={() => removeFeature(index)}
-                    >
-                      X
-                    </span>
-                  </li>
-                );
-              })}
+                    X
+                  </button>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
             <label htmlFor="image" className={labelClassName}>
               Gig Images
             </label>
-            <div>
-              <ImageUpload files={files} setFile={setFiles} />
-            </div>
+            <ImageUpload files={files} setFile={setFiles} />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-11">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <label htmlFor="shortDesc" className={labelClassName}>
               Short Description
             </label>
             <input
               type="text"
-              className={`${inputClassName}`}
+              className={inputClassName}
               id="shortDesc"
-              placeholder="Enter a short description."
+              placeholder="Enter a short description"
               name="shortDesc"
               value={data.shortDesc}
               onChange={handleChange}
@@ -273,11 +273,11 @@ const create = () => {
           </div>
           <div>
             <label htmlFor="price" className={labelClassName}>
-              Gig Price ( $ )
+              Gig Price ($)
             </label>
             <input
               type="number"
-              className={`${inputClassName} w-1/5`}
+              className={inputClassName}
               id="price"
               placeholder="Enter a price"
               name="price"
@@ -288,7 +288,7 @@ const create = () => {
         </div>
         <div>
           <button
-            className="border   text-lg font-semibold px-5 py-3   border-[#1DBF73] bg-[#1DBF73] text-white rounded-md"
+            className="w-full sm:w-auto px-5 py-3 text-white bg-[#1DBF73] hover:bg-[#18a164] rounded-md transition-colors"
             type="button"
             onClick={editGig}
           >
@@ -300,4 +300,4 @@ const create = () => {
   );
 };
 
-export default create;
+export default EditGig;

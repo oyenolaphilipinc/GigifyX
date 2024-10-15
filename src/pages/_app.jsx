@@ -25,7 +25,7 @@ export default function App({ Component, pageProps }) {
         <div
           className={`${
             router.pathname !== "/" ? "mt-32" : ""
-          } mb-auto w-full mx-auto`}
+          } mb-auto w-full mx-auto=`}
         ></div>
         <div className="mb-auto w-full mx-auto">
           <Component {...pageProps} />

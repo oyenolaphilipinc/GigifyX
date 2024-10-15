@@ -36,30 +36,36 @@ const Footer = () => {
       link: "https://twitter.com/pray3m_",
     },
   ];
+
   return (
-    <footer className="w-full md:px-20 py-6 md:py-8 h-max border-t border-gray-200 bg-gray-100">
-      <div className="mt-2 flex flex-col-reverse gap-5 md:flex-row md:justify-between ">
-        <div className="flex items-center justify-center gap-4">
-          <span>
-            <i className="text-2xl md:text-3xl font-bold">freelance</i>
-            <b className="text-green-500 text-4xl">X</b>
-          </span>
-          <p className="text-gray-400"> &copy; freelanceX Global Inc. 2023</p>
+    <footer className="w-full px-4 md:px-8 lg:px-20 py-8 bg-gray-100 border-t border-gray-200">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex flex-col items-center md:items-start gap-2">
+            <span className="text-2xl md:text-3xl font-bold">
+              freelance<b className="text-green-500">X</b>
+            </span>
+            <p className="text-gray-600 text-sm md:text-base">
+              &copy; {new Date().getFullYear()} freelanceX Global Inc.
+            </p>
+          </div>
+          <ul className="flex gap-4 md:gap-6">
+            {socialLinks.map(({ icon, link, name }) => (
+              <li key={name}>
+                <Link href={link} target="_blank" rel="noopener noreferrer">
+                  <span className="text-xl md:text-2xl text-gray-600 hover:text-green-500 transition-colors duration-300">
+                    {icon}
+                  </span>
+                  <span className="sr-only">{name}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
-        <ul className="flex gap-5  place-self-center">
-          {socialLinks.map(({ icon, link, name }) => (
-            <li
-              key={name}
-              className="text-xl text-[#404145] hover:text-[#1DBF73] transition-all"
-            >
-              <Link href={link}>{icon}</Link>
-            </li>
-          ))}
-        </ul>
+        <p className="text-center mt-6 text-sm md:text-base text-gray-600 font-medium">
+          Made With Sleepless Nights! 🌙
+        </p>
       </div>
-      <p className="text-center mt-4 font-medium">
-        Made With Sleepless Nights! 🌙
-      </p>
     </footer>
   );
 };
